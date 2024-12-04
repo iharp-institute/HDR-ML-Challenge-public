@@ -1,0 +1,49 @@
+<class 'netCDF4.Dataset'>
+root group (NETCDF4 data model, file format HDF5):
+    Conventions: CF-1.6
+    Metadata_Conventions: Unidata Dataset Discovery v1.0
+    cdm_data_type: Grid
+    comment: Sea Surface Height measured by Altimetry and derived variables
+    contact: http://climate.copernicus.eu/c3s-user-service-desk
+    creator_email: http://climate.copernicus.eu/c3s-user-service-desk
+    creator_name: Copernicus Climate Change Service (C3S)
+    creator_url: http://climate.copernicus.eu
+    date_created: 2021-07-09T08:53:57Z
+    date_issued: 2021-07-09T08:53:57Z
+    date_modified: 2021-07-09T08:53:57Z
+    geospatial_lat_max: 89.875
+    geospatial_lat_min: -89.875
+    geospatial_lat_resolution: 0.25
+    geospatial_lat_units: degrees_north
+    geospatial_lon_max: 179.875
+    geospatial_lon_min: -179.875
+    geospatial_lon_resolution: 0.25
+    geospatial_lon_units: degrees_east
+    geospatial_vertical_max: 0.0
+    geospatial_vertical_min: 0.0
+    geospatial_vertical_positive: down
+    geospatial_vertical_resolution: point
+    geospatial_vertical_units: m
+    history: 2021-07-09 08:53:58Z: Creation
+    institution: CLS, CNES
+    keywords: Oceans > Ocean Topography > Sea Surface Height
+    keywords_vocabulary: NetCDF COARDS Climate and Forecast Standard Names
+    license: http://climate.copernicus.eu/c3s-user-service-desk
+    platform: ERS-1, Topex/Poseidon,
+    processing_level: L4
+    product_version: vDec2021
+    project: Copernicus Climate Change Service (C3S)
+    references: http://climate.copernicus.eu
+    software_version: 7.0_DUACS_DT2021_baseline
+    source: Altimetry measurements
+    ssalto_duacs_comment: The reference mission used for the altimeter inter-calibration processing is Topex/Poseidon between 1993-01-01 and 2002-04-23, Jason-1 between 2002-04-24 and 2008-10-18, OSTM/Jason-2 between 2008-10-19 and 2016-06-25, Jason-3 since 2016-06-25.
+    standard_name_vocabulary: NetCDF Climate and Forecast (CF) Metadata Convention Standard Name Table v37
+    summary: SSALTO/DUACS Delayed-Time Level-4 sea surface height and derived variables measured by multi-satellite altimetry observations over Global Ocean.
+    time_coverage_duration: P1D
+    time_coverage_end: 1993-01-01T12:00:00Z
+    time_coverage_resolution: P1D
+    time_coverage_start: 1992-12-31T12:00:00Z
+    title: DT merged two satellites Global Ocean Gridded SSALTO/DUACS Sea Surface Height L4 product and derived variables
+    dimensions(sizes): time(1), latitude(100), nv(2), longitude(160)
+    variables(dimensions): int32 crs(), float32 time(time), float32 latitude(latitude), float32 lat_bnds(latitude, nv), float32 longitude(longitude), float32 lon_bnds(longitude, nv), int32 nv(nv), int32 sla(time, latitude, longitude), int32 err_sla(time, latitude, longitude), int32 ugosa(time, latitude, longitude), int32 err_ugosa(time, latitude, longitude), int32 vgosa(time, latitude, longitude), int32 err_vgosa(time, latitude, longitude), int32 adt(time, latitude, longitude), int32 ugos(time, latitude, longitude), int32 vgos(time, latitude, longitude), int32 tpa_correction(time), int32 flag_ice(time, latitude, longitude)
+    groups: 
