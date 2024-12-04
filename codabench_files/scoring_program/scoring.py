@@ -4,120 +4,123 @@ import json
 import numpy as np
 import pandas as pd
 from sklearn.metrics import f1_score
+import csv
 
 # Directory to read labels from
 input_dir = sys.argv[1]
-solutions = os.path.join(input_dir, 'ref')
-prediction_dir = os.path.join(input_dir, 'res')
+solutions = os.path.join(input_dir, "ref")
+prediction_dir = os.path.join(input_dir, "res")
 
 # Directory to output computed score into
 output_dir = sys.argv[2]
 
+
 def read_prediction():
-    prediction_file = os.path.join(prediction_dir,'test.predictions')
+    prediction_file = os.path.join(prediction_dir, "demo_sla_submission_format.csv")
 
     # Check if file exists
     if not os.path.isfile(prediction_file):
-        print('[-] Test prediction file not found!')
+        print("[-] Test prediction file not found!")
         print(prediction_file)
         return
 
+    # Read the prediction file into a dataframe
+    df_predicted = pd.read_csv(prediction_file)
+    return df_predicted
 
-    f = open(prediction_file, "r")
-    predicted_scores = [list(map(int, line.split())) for line in f.readlines()]
-    print(predicted_scores)
-    return predicted_scores
-
-
-def get_t_and_anomaly_data(solution_file):
-    # Check if file exists
-    if not os.path.isfile(solution_file):
-        print('[-] Test solution file not found!')
-        return
-
-    # Read the solution file
-    df = pd.read_csv(solution_file)
-    return df['anomaly']
 
 def read_solution():
+    solution_file = os.path.join(solutions, "model_solution.csv")
 
-    print(os.listdir(solutions))
+    # Check if file exists
+    if not os.path.isfile(solution_file):
+        print("[-] Solution file not found!")
+        print(solution_file)
+        return
 
-    # Fix Me 
-    # This does not work yet 
-    # Load all locations files 
-    # Order of the files matter
-    list_of_locations = [
-        'Atlantic_City_2008_2013_answer_data.csv', 
-        'Baltimore_2008_2013_answer_data.csv', 
-        'Eastport_2008_2013_answer_data.csv', 
-        'Fort_Pulaski_2008_2013_answer_data.csv', 
-        'Lewes_2008_2013_answer_data.csv', 
-        'New_London_2008_2013_answer_data.csv', 
-        'Newport_2008_2013_answer_data.csv', 
-        'Portland_2008_2013_answer_data.csv', 
-        'Sandy_Hook_2008_2013_answer_data.csv', 
-        'Sewells_Point_2008_2013_answer_data.csv', 
-        'The_Battery_2008_2013_answer_data.csv', 
-        'Washington_2008_2013_answer_data.csv' 
-    ]
+    # Read the solution file into a dataframe
+    df_solution = pd.read_csv(solution_file)
+    return df_solution
 
 
-    test_answer_location = [get_t_and_anomaly_data(os.path.join(solutions, location)).size for location in list_of_locations] 
+def compute_metrics(prediction, solution):
+    # Merge the dataframes on the Date column
+    merged_df = pd.merge(prediction, solution, on="Date", suffixes=("_pred", "_true"))
 
-    print(test_answer_location)
+    # Initialize lists to store metrics for each location
+    tpr_list = []
+    fpr_list = []
+    f1_list = []
 
-    return test_answer_location
+    # Iterate over each location column
+    for location in prediction.columns[1:]:  # Skip the 'Date' column
+        y_true = merged_df[f"{location}_true"]
+        y_pred = merged_df[f"{location}_pred"]
+
+        # Calculate True Positives, False Positives, True Negatives, and False Negatives
+        tp = ((y_true == 1) & (y_pred == 1)).sum()
+        fp = ((y_true == 0) & (y_pred == 1)).sum()
+        tn = ((y_true == 0) & (y_pred == 0)).sum()
+        fn = ((y_true == 1) & (y_pred == 0)).sum()
+
+        # Calculate TPR, FPR, and F1-score
+        tpr = tp / (tp + fn) if (tp + fn) > 0 else 0
+        fpr = fp / (fp + tn) if (fp + tn) > 0 else 0
+        f1 = f1_score(y_true, y_pred)
+
+        # Append the metrics to the lists
+        tpr_list.append(tpr)
+        fpr_list.append(fpr)
+        f1_list.append(f1)
+
+    # Calculate the average metrics across all locations
+    avg_tpr = np.mean(tpr_list)
+    avg_fpr = np.mean(fpr_list)
+    avg_f1 = np.mean(f1_list)
+
+    return avg_tpr, avg_fpr, avg_f1
 
 
-def save_score(f1_t_only, f1_t_and_location, final_grade):
-    score_file = os.path.join(output_dir, 'scores.json')
+def save_score(avg_tpr, avg_fpr, avg_f1):
+    score_file = os.path.join(output_dir, "scores.json")
 
     scores = {
-        'F1-Score': f1_t_only,
-        'F1-Score with location': f1_t_and_location,
-        'Final Grade': final_grade
+        "Average True Positive Rate (TPR)": avg_tpr,
+        "Average False Positive Rate (FPR)": avg_fpr,
+        "Average F1-Score": avg_f1,
     }
-    with open(score_file, 'w') as f_score:
-        f_score.write(json.dumps(scores))
-        f_score.close()
+    with open(score_file, "w") as f_score:
+        json.dump(scores, f_score, indent=4)
 
 
 def print_pretty(text):
     print("-------------------")
-    print("#---",text)
+    print("#---", text)
     print("-------------------")
 
 
-    
 def main():
 
     # Read prediction and solution
-    print_pretty('Reading prediction')
+    print_pretty("Reading prediction")
     prediction = read_prediction()
     solution = read_solution()
 
-    print(prediction)
+    # print(prediction)
 
-    # Compute Score
-    print_pretty('Computing score')
-    # Fix Me 
-    f1_t_only = f1_score(merged_t['anomaly_true'], merged_t['anomaly_pred'])
-
-    # F1-score based on both 't' and 'location' columns
-    f1_t_and_location = f1_score(merged_df['anomaly_true'], merged_df['anomaly_pred'])
-
-    # Calculate the final grade with weightages
-    final_grade = (0.3 * f1_t_only) + (0.7 * f1_t_and_location)
+    # Compute metrics
+    print_pretty("Computing metrics")
+    avg_tpr, avg_fpr, avg_f1 = compute_metrics(prediction, solution)
 
     # Print the results
-    print(f"F1-Score based only on 't': {f1_t_only:.4f}")
-    print(f"F1-Score based on 't' and 'location': {f1_t_and_location:.4f}")
-    print(f"Final Grade: {final_grade:.4f}")
+    print(f"Average True Positive Rate (TPR): {avg_tpr:.4f}")
+    print(f"Average False Positive Rate (FPR): {avg_fpr:.4f}")
+    print(f"Average F1-Score: {avg_f1:.4f}")
 
-    # Write Score
-    print_pretty('Saving prediction')
-    save_score(score)
+    # Save the results
+    print_pretty("Saving metrics")
+    save_score(avg_tpr, avg_fpr, avg_f1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
